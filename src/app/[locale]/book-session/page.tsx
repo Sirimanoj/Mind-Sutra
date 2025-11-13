@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Card,
@@ -29,10 +29,14 @@ const availableTimeSlots = [
 ];
 
 export default function BookSessionPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const { toast } = useToast();
   const t = useTranslations('BookSession');
+
+  useEffect(() => {
+    setSelectedDate(new Date());
+  }, []);
 
   const handleBooking = () => {
     if (!selectedDate || !selectedTime) {

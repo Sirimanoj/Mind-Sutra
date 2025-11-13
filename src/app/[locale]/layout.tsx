@@ -13,8 +13,9 @@ type LocaleLayoutProps = {
 
 export default async function LocaleLayout({
   children,
-  params: { locale },
+  params,
 }: LocaleLayoutProps) {
+  const { locale } = params;
   const messages = await getMessages();
 
   return (

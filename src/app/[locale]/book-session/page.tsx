@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -35,6 +34,7 @@ export default function BookSessionPage() {
   const t = useTranslations('BookSession');
 
   useEffect(() => {
+    // Set the initial date only on the client to avoid hydration mismatch
     setSelectedDate(new Date());
   }, []);
 

@@ -99,12 +99,10 @@ export function AuthForm() {
         }
         const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
         await updateProfile(userCredential.user, { displayName: values.name });
-        // The onAuthStateChanged listener will handle the redirect and Firestore creation
-        // but we can call it here explicitly to be sure
         handleAuthSuccess(userCredential.user, values.name);
       } else {
-        await signInWithEmailAndPassword(auth, values.email, values.password);
-        // onAuthStateChanged will handle the redirect
+        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+        handleAuthSuccess(userCredential.user);
       }
     } catch (error) {
       handleAuthError(error, activeTab === 'signin' ? 'signIn' : 'signUp');

@@ -1,0 +1,240 @@
+{
+  "entities": {
+    "UserAccount": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserAccount",
+      "type": "object",
+      "description": "Represents a user's core account information for authentication and basic profile details.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user account."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "User's phone number for 2FA (if enabled)."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User's display name."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role (student, counselor, admin)."
+        },
+        "languagePreference": {
+          "type": "string",
+          "description": "User's preferred language (en, hi, ur, etc.)."
+        },
+        "isAnonymous": {
+          "type": "boolean",
+          "description": "Indicates if the account is an anonymous account."
+        },
+        "profileId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserAccount 1:1 UserProfile)"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "role",
+        "languagePreference"
+      ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents extended profile information for a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user profile."
+        },
+        "age": {
+          "type": "number",
+          "description": "User's age."
+        },
+        "gender": {
+          "type": "string",
+          "description": "User's gender."
+        },
+        "course": {
+          "type": "string",
+          "description": "User's course of study."
+        },
+        "year": {
+          "type": "number",
+          "description": "User's year of study."
+        },
+        "concerns": {
+          "type": "array",
+          "description": "List of user's mental health concerns.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "institution": {
+          "type": "string",
+          "description": "The institution the user belongs to."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/userAccounts/{userAccountId}",
+        "definition": {
+          "entityName": "UserAccount",
+          "schema": {
+            "$ref": "#/backend/entities/UserAccount"
+          },
+          "description": "Stores user account information, including authentication details, role, language preference, and a reference to the user's profile. Includes denormalized 'role' and 'languagePreference' for authorization independence.",
+          "params": [
+            {
+              "name": "userAccountId",
+              "description": "The unique identifier for the user account."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/userProfiles/{userProfileId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores extended user profile information, such as age, gender, course, and concerns.",
+          "params": [
+            {
+              "name": "userProfileId",
+              "description": "The unique identifier for the user profile."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/conversations/{conversationId}",
+        "definition": {
+          "entityName": "conversations",
+          "schema": {
+            "$ref": "#/firebase_configuration/firestore/collections/1/schema"
+          },
+          "description": "Stores conversation data for each user. User conversations are secured under their userId.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "conversationId",
+              "description": "The unique identifier for the conversation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/appointments/{appointmentId}",
+        "definition": {
+          "entityName": "appointments",
+          "schema": {
+            "$ref": "#/firebase_configuration/firestore/collections/2/schema"
+          },
+          "description": "Stores appointment data, nested under the user who scheduled it. Counselors also have access based on counselorId.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user (student)."
+            },
+            {
+              "name": "appointmentId",
+              "description": "The unique identifier for the appointment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/counselors/{counselorId}",
+        "definition": {
+          "entityName": "counselors",
+          "schema": {
+            "$ref": "#/firebase_configuration/firestore/collections/3/schema"
+          },
+          "description": "Stores counselor profiles and availability.",
+          "params": [
+            {
+              "name": "counselorId",
+              "description": "The unique identifier for the counselor."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/resources/{resourceId}",
+        "definition": {
+          "entityName": "resources",
+          "schema": {
+            "$ref": "#/firebase_configuration/firestore/collections/4/schema"
+          },
+          "description": "Stores mental health resources like articles, videos, and audio guides.",
+          "params": [
+            {
+              "name": "resourceId",
+              "description": "The unique identifier for the resource."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/posts/{postId}",
+        "definition": {
+          "entityName": "posts",
+          "schema": {
+            "$ref": "#/firebase_configuration/firestore/collections/5/schema"
+          },
+          "description": "Stores posts from the anonymous forum, allowing students to share experiences and offer support.",
+          "params": [
+            {
+              "name": "postId",
+              "description": "The unique identifier for the post."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/analytics/{date}",
+        "definition": {
+          "entityName": "analytics",
+          "schema": {
+            "$ref": "#/firebase_configuration/firestore/collections/6/schema"
+          },
+          "description": "Stores analytics data for administrators.",
+          "params": [
+            {
+              "name": "date",
+              "description": "The date for which the analytics data is stored."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure prioritizes security and scalability for the CampusMind application. User data is segregated into `userAccounts` and `userProfiles` collections to isolate authentication information from profile details. This structure allows for role-based access control and efficient data retrieval. User-owned data, such as conversations and appointments, are nested under the `/users/{userId}` path to enforce ownership.  Resources, being globally accessible to authenticated users, reside in a top-level `/resources` collection. Posts, which require moderation and can be anonymous, are stored in the `/posts` collection. Denormalization is applied by storing user roles and institution within the `userAccounts` document, eliminating the need for `get()` calls in security rules and enabling Authorization Independence.  This design supports secure list operations (QAPs) via structural segregation: only authenticated users can read resources, and only admins can read analytics. Data requiring stricter ownership, like user accounts and conversations, are protected by path-based rules, allowing users to only access their own data. Collaborative data is handled via the membership maps where appropriate, enhancing rule simplicity and security."
+  }
+}

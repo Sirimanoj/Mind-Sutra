@@ -17,19 +17,22 @@ import { User as UserIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const t = useTranslations('Profile');
   const { user } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       // Redirect to login page after successful sign-out
-      router.push('/login');
+      // Extract locale from pathname to construct the correct redirect path
+      const locale = pathname.split('/')[1] || 'en';
+      router.push(`/${locale}/login`);
     } catch (error) {
       console.error("Error signing out: ", error);
       // Optionally, show an error toast to the user

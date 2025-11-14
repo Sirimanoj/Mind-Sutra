@@ -14,7 +14,7 @@ import {
   updateProfile,
   User,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,7 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth, useFirestore } from '@/firebase';
 import { Loader, Chrome } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export function AuthForm() {
   const t = useTranslations('Auth');
@@ -42,6 +42,8 @@ export function AuthForm() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'en';
 
   const formSchema = z.object({
     name: z.string().optional(),
@@ -63,16 +65,10 @@ export function AuthForm() {
       email: user.email,
       displayName: name || user.displayName || 'Anonymous User',
       role: 'student', // Default role
-      languagePreference: 'en',
+      languagePreference: locale,
     }, { merge: true });
   };
-
-  const handleAuthSuccess = (user: User, name?: string) => {
-    createUserInFirestore(user, name);
-    toast({ title: t('signInSuccess') });
-    router.push('/dashboard');
-  };
-
+  
   const handleAuthError = (error: any, type: 'signIn' | 'signUp') => {
     console.error(`${type} error:`, error);
     let description = error.message;
@@ -99,10 +95,13 @@ export function AuthForm() {
         }
         const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
         await updateProfile(userCredential.user, { displayName: values.name });
-        handleAuthSuccess(userCredential.user, values.name);
+        await createUserInFirestore(userCredential.user, values.name);
+        toast({ title: t('signUpSuccess') });
+        router.push(`/${locale}/dashboard`);
       } else {
-        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-        handleAuthSuccess(userCredential.user);
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        toast({ title: t('signInSuccess') });
+        router.push(`/${locale}/dashboard`);
       }
     } catch (error) {
       handleAuthError(error, activeTab === 'signin' ? 'signIn' : 'signUp');
@@ -116,7 +115,14 @@ export function AuthForm() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      handleAuthSuccess(result.user);
+      // Check if user exists in Firestore, if not, create them
+      const userRef = doc(firestore, 'userAccounts', result.user.uid);
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        await createUserInFirestore(result.user);
+      }
+      toast({ title: t('signInSuccess') });
+      router.push(`/${locale}/dashboard`);
     } catch (error) {
       handleAuthError(error, 'signIn');
     } finally {

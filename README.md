@@ -8,10 +8,10 @@ Here’s a well-structured **README.md template** for your repository that cover
 
 | Name           | Role                  | Responsibilities                  |
 | -------------- | --------------------- | --------------------------------- |
-| B. Kula Deepthi | Team Lead | Overall coordination |
+| S. Manoj Kumar | Team Lead | Overall coordination |
 | Hari Prasad L  | Backend Developer     | Node.js/Firebase API, Auth, DB    |
 | Hariteja  | Frontend Developer    | React.js/React Native, UI/UX      |
-| S. Manoj Kaumar  | AI/ML Specialist      | Gemini/OpenAI API integration     |
+| B. Kula Deepthi  | AI/ML Specialist      | Gemini/OpenAI API integration     |
 | Vinay NR | Domain Expert         | Mental health consultant, testing |
 
 ## Repository Structure
